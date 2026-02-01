@@ -1,6 +1,7 @@
 import os
 import django
 import random
+import uuid
 from decimal import Decimal
 from datetime import datetime, timedelta
 
@@ -9,7 +10,8 @@ django.setup()
 
 from store.models import (
     User, Customer, Staff, Manager, Category, Publisher, Author,
-    Book, BookAuthor, BookCategory, Supplier, Warehouse
+    Book, BookAuthor, BookCategory, Supplier, Warehouse,
+    Order, OrderItem, OrderStatus, Shipping, Tracking
 )
 
 def create_users():
@@ -110,7 +112,36 @@ def create_users():
         )
         customers.append(customer)
     
-    print(f"Đã kiểm tra/tạo {len(users_data) + len(managers_data) + 1} users, {len(managers_data)} managers, và {len(customers)} customers")
+    # Tạo thêm random customers
+    print("Tạo thêm random customers...")
+    last_names = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Dương', 'Lý']
+    middle_names = ['Văn', 'Thị', 'Minh', 'Hữu', 'Đức', 'Ngọc', 'Xuân', 'Thu', 'Thành', 'Quang', 'Bảo']
+    first_names = ['An', 'Bình', 'Cường', 'Dung', 'Giang', 'Hoa', 'Hùng', 'Khánh', 'Lan', 'Minh', 'Nam', 'Nga', 'Oanh', 'Phúc', 'Quân', 'Sơn', 'Thảo', 'Trang', 'Tú', 'Uyên', 'Vy', 'Yến']
+    
+    for i in range(20):
+        fullname = f"{random.choice(last_names)} {random.choice(middle_names)} {random.choice(first_names)}"
+        username = f"customer{i+1}"
+        email = f"customer{i+1}@example.com"
+        
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={
+                'email': email,
+                'fullname': fullname,
+                'tel': f'09{random.randint(10000000, 99999999)}'
+            }
+        )
+        if created:
+            user.set_password('password123')
+            user.save()
+            
+        customer, _ = Customer.objects.get_or_create(
+            user=user,
+            defaults={'tel': user.tel}
+        )
+        customers.append(customer)
+    
+    print(f"Đã kiểm tra/tạo {len(users_data) + len(managers_data) + 1} users gốc, {len(managers_data)} managers, và tổng {len(customers)} customers")
     return customers
 
 
@@ -287,7 +318,157 @@ def create_warehouses():
         warehouses.append(warehouse)
     
     print(f"Đã tạo {len(warehouses)} warehouses")
+    print(f"Đã tạo {len(warehouses)} warehouses")
     return warehouses
+
+
+def create_orders(customers, books):
+    print("Tạo orders...")
+    statuses = ['pending', 'confirmed', 'shipping', 'completed', 'cancelled']
+    
+    orders = []
+    
+    for customer in customers:
+        # Mỗi khách hàng có 3-8 đơn hàng
+        num_orders = random.randint(3, 8)
+        
+        for _ in range(num_orders):
+            # Chọn status ngẫu nhiên, ưu tiên shipping một chút nếu cần
+            status = random.choice(statuses)
+            
+            # Tạo ID đơn hàng
+            timestamp = datetime.now().strftime('%y%m%d')
+            random_str = f"{random.randint(1000, 9999)}"
+            order_id = f"ORD-{timestamp}-{random_str}-{len(orders)}"
+            
+            # Random ngày tạo (trong vòng 30 ngày qua)
+            days_ago = random.randint(0, 30)
+            created_at = datetime.now() - timedelta(days=days_ago)
+            
+            order = Order.objects.create(
+                id=order_id,
+                customer=customer,
+                total=0,
+                status=status
+            )
+            order.created_at = created_at
+            order.save()
+            
+            # Tạo OrderItems
+            selected_books = random.sample(books, random.randint(1, 5))
+            total_amount = 0
+            
+            for book in selected_books:
+                quantity = random.randint(1, 3)
+                price = book.price
+                
+                OrderItem.objects.create(
+                    order=order,
+                    book=book,
+                    quantity=quantity,
+                    price=price
+                )
+                total_amount += price * quantity
+            
+            order.total = total_amount
+            order.save()
+            
+            # Create Shipping for relevant statuses
+            if status in ['shipping', 'shipped', 'delivered', 'completed']:
+                shipping_status = 'delivered' if status in ['delivered', 'completed'] else 'shipped'
+                
+                shipping = Shipping.objects.create(
+                    order=order,
+                    tracking_number=f"TRK-{order.id.split('-')[1]}-{uuid.uuid4().hex[:6].upper()}",
+                    status=shipping_status,
+                    shipped_date=created_at + timedelta(days=1)
+                )
+                
+                if shipping_status == 'delivered':
+                    shipping.delivered_date = shipping.shipped_date + timedelta(days=random.randint(2, 5))
+                    shipping.save()
+                
+                # Tracking history
+                locs = ['Kho Hà Nội', 'Kho trung chuyển', 'Bưu cục giao nhận']
+                
+                # 1. Picked up
+                t1 = Tracking.objects.create(
+                    shipping=shipping,
+                    location='Kho Hà Nội',
+                    status='picked_up',
+                    note='Đơn hàng đã được lấy'
+                )
+                t1.timestamp = shipping.shipped_date
+                t1.save()
+                
+                # 2. In transit
+                t2 = Tracking.objects.create(
+                    shipping=shipping,
+                    location='Kho trung chuyển',
+                    status='in_transit',
+                    note='Đang luân chuyển'
+                )
+                t2.timestamp = shipping.shipped_date + timedelta(hours=12)
+                t2.save()
+                
+                # 3. Delivered (if applicable)
+                if shipping_status == 'delivered':
+                    t3 = Tracking.objects.create(
+                        shipping=shipping,
+                        location='Địa chỉ khách hàng',
+                        status='delivered',
+                        note='Giao hàng thành công'
+                    )
+                    t3.timestamp = shipping.delivered_date
+                    t3.save()
+
+            # Create OrderStatus history (Timeline)
+            # 1. Pending (Created)
+            s1 = OrderStatus.objects.create(
+                order=order,
+                status='pending',
+                note='Đơn hàng đã được tạo'
+            )
+            s1.updated_at = created_at
+            s1.save()
+            
+            # 2. Confirmed (if not pending)
+            if status != 'pending':
+                confirmed_at = created_at + timedelta(hours=random.randint(1, 5))
+                s2 = OrderStatus.objects.create(
+                    order=order,
+                    status='confirmed',
+                    note='Đơn hàng đã được xác nhận'
+                )
+                s2.updated_at = confirmed_at
+                s2.save()
+                
+                # 3. Shipping (if applicable)
+                if status in ['shipping', 'shipped', 'delivered', 'completed']:
+                    shipping_at = confirmed_at + timedelta(hours=random.randint(4, 24))
+                    s3 = OrderStatus.objects.create(
+                        order=order,
+                        status='shipping',
+                        note='Đơn hàng đã được giao cho đơn vị vận chuyển'
+                    )
+                    s3.updated_at = shipping_at
+                    s3.save()
+                    
+                    # 4. Completed (if applicable)
+                    if status in ['delivered', 'completed']:
+                        completed_at = shipping.delivered_date if 'shipping' in locals() else shipping_at + timedelta(days=2)
+                        s4 = OrderStatus.objects.create(
+                            order=order,
+                            status='completed',
+                            note='Đơn hàng đã giao thành công'
+                        )
+                        s4.updated_at = completed_at
+                        s4.save()
+
+            orders.append(order)
+    
+    print(f"Đã tạo {len(orders)} orders từ {len(customers)} customers")
+    return orders
 
 
 def main():
@@ -301,6 +482,7 @@ def main():
     books = create_books(categories, publishers, authors)
     suppliers = create_suppliers()
     warehouses = create_warehouses()
+    orders = create_orders(customers, books)
     
     print("="*50)
     print("Hoàn thành tạo dữ liệu mẫu!")
@@ -313,6 +495,7 @@ def main():
     print(f"- Books: {Book.objects.count()}")
     print(f"- Suppliers: {Supplier.objects.count()}")
     print(f"- Warehouses: {Warehouse.objects.count()}")
+    print(f"- Orders: {Order.objects.count()}")
 
 
 if __name__ == '__main__':

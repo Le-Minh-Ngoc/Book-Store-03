@@ -216,7 +216,7 @@ def admin_update_order_status(request, order_id):
         
         OrderDAO.update_order_status(order, new_status, note)
         
-        return redirect('admin_order_detail', order_id=order_id)
+        return redirect('admin_orders_list')
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 

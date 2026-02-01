@@ -25,7 +25,12 @@ def get_or_create_customer(user):
 def cart_view(request):
     customer = get_or_create_customer(request.user)
     cart = CartDAO.get_or_create_cart(customer)
-    cart_items = CartDAO.get_cart_items(cart)
+    cart_items = list(CartDAO.get_cart_items(cart))
+    
+    # Calculate subtotal for each item
+    for item in cart_items:
+        item.subtotal = item.book.price * item.quantity
+        
     total = CartDAO.get_cart_total(cart)
     
     context = {
@@ -237,14 +242,61 @@ def track_order_view(request, order_id):
     context = {
         'order': order,
         'order_items': OrderDAO.get_order_items(order),
-        'status_history': OrderDAO.get_order_status_history(order),
     }
     
+    # Combine status history and tracking history
+    timeline = []
+    
+    # Add order status history
+    status_history = OrderDAO.get_order_status_history(order)
+    for status in status_history:
+        timeline.append({
+            'type': 'status',
+            'status': status.status,
+            'note': status.note,
+            'timestamp': status.updated_at
+        })
+    
+    # Add tracking history
     if hasattr(order, 'shipping'):
         from store.controllers.OrderDAO.shipping_dao import ShippingDAO
-        context['shipping'] = order.shipping
-        context['tracking_history'] = ShippingDAO.get_tracking_history(order.shipping)
-        context['shipping_address'] = ShippingDAO.get_shipping_address(order.shipping)
+        shipping = order.shipping
+        context['shipping'] = shipping
+        context['shipping_address'] = ShippingDAO.get_shipping_address(shipping)
+        
+        tracking_history = ShippingDAO.get_tracking_history(shipping)
+        for track in tracking_history:
+            timeline.append({
+                'type': 'tracking',
+                'status': track.status,
+                'location': track.location,
+                'note': track.note,
+                'timestamp': track.timestamp
+            })
+            
+    # Add initial created event if not in history
+    if not any(item['status'] == 'pending' for item in timeline):
+        timeline.append({
+            'type': 'status',
+            'status': 'pending',
+            'note': 'Đơn hàng đã được tạo thành công.',
+            'timestamp': order.created_at
+        })
+            
+    # Sort timeline by timestamp descending
+    timeline.sort(key=lambda x: x['timestamp'], reverse=True)
+    
+    # Deduplicate consecutive identical statuses
+    unique_timeline = []
+    if timeline:
+        unique_timeline.append(timeline[0])
+        for event in timeline[1:]:
+            last_event = unique_timeline[-1]
+            # Skip if same type and status
+            if event['type'] != last_event['type'] or event['status'] != last_event['status']:
+                unique_timeline.append(event)
+                
+    context['timeline'] = unique_timeline
     
     if hasattr(order, 'payment'):
         context['payment'] = order.payment

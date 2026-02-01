@@ -41,7 +41,7 @@
                             </form>
                         </td>
                         <td style="padding: 1rem; text-align: center; font-weight: bold; color: #667eea;">{{
-                            item.book.price|floatformat:0 }} VNĐ</td>
+                            item.subtotal|floatformat:0 }} VNĐ</td>
                         <td style="padding: 1rem; text-align: center;">
                             <form method="POST" action="{% url 'remove_from_cart' item.id %}" style="display: inline;">
                                 {% csrf_token %}

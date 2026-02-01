@@ -16,7 +16,7 @@
     <div class="card">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                 <!-- Cột trái -->
                 <div>
@@ -61,17 +61,82 @@
                 <div>
                     <div class="form-group">
                         <label for="image_url">URL Hình ảnh</label>
-                        <input type="url" class="form-control" id="image_url" name="image_url" placeholder="https://example.com/image.jpg">
+                        <input type="url" class="form-control" id="image_url" name="image_url"
+                            placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="published_year">Năm XB</label>
+                            <input type="number" class="form-control" id="published_year" name="published_year"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="page_count">Số trang</label>
+                            <input type="number" class="form-control" id="page_count" name="page_count" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="language">Ngôn ngữ</label>
+                            <input type="text" class="form-control" id="language" name="language" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Mô tả</label>
-                        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label>Tác giả</label>
+                        <div
+                            style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+                            {% for author in authors %}
+                            <div style="margin-bottom: 0.5rem;">
+                                <input type="checkbox" id="auth_{{ author.id }}" name="authors" value="{{ author.id }}">
+                                <label for="auth_{{ author.id }}">{{ author.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-info"
+                            onclick="document.getElementById('new-author-section').style.display = document.getElementById('new-author-section').style.display === 'none' ? 'block' : 'none';"
+                            style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
+                            + Thêm tác giả mới
+                        </button>
+
+                        <div id="new-author-section"
+                            style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #eee; border-radius: 4px; background: rgba(255,255,255,0.05);">
+                            <h5 style="margin-top: 0; color: white;">Thông tin tác giả mới</h5>
+                            <div class="form-group">
+                                <label for="new_author_id" style="font-size: 0.8rem;">Mã TG</label>
+                                <input type="text" class="form-control" id="new_author_id" name="new_author_id"
+                                    placeholder="VD: AUTH001">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_author_name" style="font-size: 0.8rem;">Tên</label>
+                                <input type="text" class="form-control" id="new_author_name" name="new_author_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_author_birthdate" style="font-size: 0.8rem;">Ngày sinh</label>
+                                <input type="date" class="form-control" id="new_author_birthdate"
+                                    name="new_author_birthdate">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_author_country" style="font-size: 0.8rem;">Quốc gia</label>
+                                <input type="text" class="form-control" id="new_author_country"
+                                    name="new_author_country">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_author_address" style="font-size: 0.8rem;">Địa chỉ</label>
+                                <input type="text" class="form-control" id="new_author_address"
+                                    name="new_author_address">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>Thể loại</label>
-                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px;">
+                        <div
+                            style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px;">
                             {% for cat in categories %}
                             <div style="margin-bottom: 0.5rem;">
                                 <input type="checkbox" id="cat_{{ cat.id }}" name="categories" value="{{ cat.id }}">

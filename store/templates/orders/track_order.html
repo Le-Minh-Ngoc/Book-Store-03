@@ -1,0 +1,164 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Theo dõi đơn hàng #{{ order.id }} - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Theo dõi đơn hàng #{{ order.id }}
+    </h1>
+
+    <div style="max-width: 900px; margin: 0 auto;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="padding: 1.5rem;">
+                <h3 style="margin-bottom: 1.5rem; text-align: center;">Trạng thái đơn hàng</h3>
+
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; max-width: 800px; margin: 0 auto;">
+                    <!-- Progress Bar Background -->
+                    <div
+                        style="position: absolute; top: 15px; left: 0; width: 100%; height: 4px; background: #e9ecef; z-index: 1;">
+                    </div>
+
+                    <!-- Progress Bar Active - Calculate width based on status -->
+                    {% with status=order.status %}
+                    <div style="position: absolute; top: 15px; left: 0; height: 4px; background: #1a2980; z-index: 2; transition: width 0.5s;
+                        width: {% if status == 'pending' %}10%
+                               {% elif status == 'confirmed' or status == 'processing' %}35%
+                               {% elif status == 'shipping' or status == 'shipped' %}65%
+                               {% elif status == 'completed' or status == 'delivered' %}100%
+                               {% elif status == 'cancelled' %}100%; background: #dc3545
+                               {% else %}0%{% endif %};">
+                    </div>
+                    {% endwith %}
+
+                    <!-- Steps -->
+                    <div style="position: relative; z-index: 3; text-align: center;">
+                        <div
+                            style="width: 30px; height: 30px; border-radius: 50%; background: #1a2980; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                            1</div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;">Đã đặt hàng</div>
+                    </div>
+
+                    <div style="position: relative; z-index: 3; text-align: center;">
+                        <div
+                            style="width: 30px; height: 30px; border-radius: 50%; 
+                            {% if order.status == 'pending' and order.status != 'cancelled' %}background: #e9ecef; color: #6c757d;{% else %}background: #1a2980; color: white;{% endif %}
+                             display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                            2</div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;">Đã xác nhận</div>
+                    </div>
+
+                    <div style="position: relative; z-index: 3; text-align: center;">
+                        <div
+                            style="width: 30px; height: 30px; border-radius: 50%; 
+                            {% if order.status == 'shipping' or order.status == 'shipped' or order.status == 'completed' or order.status == 'delivered' %}background: #1a2980; color: white;{% else %}background: #e9ecef; color: #6c757d;{% endif %}
+                             display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                            3</div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;">Đang giao</div>
+                    </div>
+
+                    <div style="position: relative; z-index: 3; text-align: center;">
+                        <div
+                            style="width: 30px; height: 30px; border-radius: 50%; 
+                            {% if order.status == 'completed' or order.status == 'delivered' %}background: #1a2980; color: white;{% elif order.status == 'cancelled' %}background: #dc3545; color: white;{% else %}background: #e9ecef; color: #6c757d;{% endif %}
+                             display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                            {% if order.status == 'cancelled' %}✕{% else %}4{% endif %}
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;">
+                            {% if order.status == 'cancelled' %}Đã hủy{% else %}Hoàn thành{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if shipping %}
+                <div style="margin-top: 3rem;">
+                    <h4 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Thông tin
+                        vận chuyển</h4>
+
+                    <div
+                        style="background: #f0f7ff; padding: 1.5rem; border-radius: 8px; border: 1px solid #cce5ff; margin-bottom: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <strong>Mã vận đơn:</strong>
+                                <span
+                                    style="color: #1a2980; font-weight: bold; font-family: monospace; font-size: 1.1rem;">{{
+                                    shipping.tracking_number }}</span>
+                            </div>
+                            <div>
+                                <strong>Đơn vị vận chuyển:</strong>
+                                <span>Giao hàng nhanh</span>
+                            </div>
+                            {% if shipping.shipper %}
+                            <div>
+                                <strong>Shipper:</strong>
+                                <span>{{ shipping.shipper.user.fullname }} ({{ shipping.shipper.user.tel }})</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div style="margin-top: 3rem;">
+                    <h4 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Lịch sử
+                        đơn hàng</h4>
+
+                    <ul style="list-style: none; padding: 0; position: relative;">
+                        <!-- Vertical line -->
+                        <div
+                            style="position: absolute; top: 0; bottom: 0; left: 15px; width: 2px; background: #e9ecef;">
+                        </div>
+
+                        {% for event in timeline %}
+                        <li style="position: relative; padding-left: 45px; margin-bottom: 1.5rem;">
+                            <!-- Dot -->
+                            <div
+                                style="position: absolute; left: 9px; top: 5px; width: 14px; height: 14px; border-radius: 50%; 
+                                {% if event.type == 'status' %}background: #1a2980; border: 3px solid white; box-shadow: 0 0 0 1px #1a2980;
+                                {% else %}background: #28a745; border: 3px solid white; box-shadow: 0 0 0 1px #28a745;{% endif %}">
+                            </div>
+
+                            <div
+                                style="background: {% if event.type == 'status' %}#f8f9fa{% else %}white{% endif %}; 
+                                padding: 1rem; border-radius: 8px; border-left: 4px solid {% if event.type == 'status' %}#1a2980{% else %}#28a745{% endif %};
+                                {% if event.type == 'tracking' %}border: 1px solid #e9ecef; border-left: 4px solid #28a745; box-shadow: 0 2px 4px rgba(0,0,0,0.05);{% endif %}">
+
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong
+                                        style="color: {% if event.type == 'status' %}#1a2980{% else %}#28a745{% endif %}; text-transform: uppercase;">
+                                        {% if event.status == 'pending' %}Đơn hàng đã được tạo
+                                        {% elif event.status == 'confirmed' %}Đơn hàng đã được xác nhận
+                                        {% elif event.status == 'shipping' or event.status == 'shipped' %}Đã giao cho
+                                        đơn vị vận chuyển
+                                        {% elif event.status == 'completed' or event.status == 'delivered' %}Giao hàng
+                                        thành công
+                                        {% elif event.status == 'cancelled' %}Đơn hàng đã bị hủy
+                                        {% elif event.status == 'picked_up' %}Đã lấy hàng
+                                        {% elif event.status == 'in_transit' %}Đang luân chuyển
+                                        {% else %}{{ event.status }}{% endif %}
+
+                                        {% if event.location %} - {{ event.location }}{% endif %}
+                                    </strong>
+                                    <span style="color: #666; font-size: 0.9rem;">{{ event.timestamp|date:"d/m/Y H:i"
+                                        }}</span>
+                                </div>
+                                {% if event.note %}
+                                <p style="margin: 0; color: #555;">{{ event.note }}</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div style="padding: 1.5rem; text-align: center; border-top: 2px solid #f0f0f0;">
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-secondary">Quay lại chi tiết đơn hàng</a>
+                <a href="{% url 'order_list' %}" class="btn btn-outline-primary" style="margin-left: 10px;">Danh sách
+                    đơn hàng</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

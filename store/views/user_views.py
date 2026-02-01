@@ -66,16 +66,25 @@ def login_view(request):
             device = request.META.get('HTTP_USER_AGENT', 'Unknown')
             LoginHistoryDAO.create_login_history(user=user, ip_address=ip, device=device)
             
-            if user.is_superuser:
-                return redirect('/admin/')
-            elif hasattr(user, 'staff_profile'):
+            if hasattr(user, 'staff_profile'):
                 try:
-                    manager = user.staff_profile.manager_profile
-                    return redirect('manager_dashboard')
+                    # Check if Admin
+                    if hasattr(user.staff_profile, 'admin_profile'):
+                        return redirect('admin_dashboard')
                 except:
-                    return redirect('book_list')
-            else:
-                return redirect('book_list')
+                    pass
+                
+                try:
+                    # Check if Manager
+                    if hasattr(user.staff_profile, 'manager_profile'):
+                        return redirect('manager_dashboard')
+                except:
+                    pass
+
+            if user.is_superuser:
+                return redirect('admin_dashboard')
+                
+            return redirect('book_list')
         else:
             return render(request, 'users/login.html', {'error': 'Invalid credentials'})
     
@@ -100,6 +109,10 @@ def profile_view(request):
         context['customer'] = customer
         context['addresses'] = CustomerDAO.get_customer_addresses(customer)
         context['memberships'] = CustomerDAO.get_customer_memberships(customer)
+    
+    context['base_template'] = 'base/base.html'
+    if user.is_authenticated and hasattr(user, 'staff_profile'):
+        context['base_template'] = 'base/manager_base.html'
     
     return render(request, 'users/profile.html', context)
 

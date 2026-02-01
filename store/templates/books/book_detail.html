@@ -7,10 +7,15 @@
     <div class="card" style="max-width: 900px; margin: 0 auto;">
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
             <div>
+                {% if book.image_url %}
+                <img src="{{ book.image_url }}" alt="{{ book.title }}"
+                    style="width: 100%; height: 400px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                {% else %}
                 <div
                     style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; padding: 2rem; text-align: center;">
                     {{ book.title }}
                 </div>
+                {% endif %}
             </div>
 
             <div>

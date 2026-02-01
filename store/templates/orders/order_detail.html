@@ -19,15 +19,20 @@
                 <div>
                     {% if order.status == 'pending' %}
                     <span class="badge badge-warning">Chờ xử lý</span>
-                    {% elif order.status == 'processing' %}
+                    {% elif order.status == 'processing' or order.status == 'confirmed' %}
                     <span class="badge badge-info">Đang xử lý</span>
-                    {% elif order.status == 'shipped' %}
+                    {% elif order.status == 'shipped' or order.status == 'shipping' %}
                     <span class="badge badge-info">Đang giao</span>
-                    {% elif order.status == 'delivered' %}
+                    {% elif order.status == 'delivered' or order.status == 'completed' %}
                     <span class="badge badge-success">Đã giao</span>
                     {% elif order.status == 'cancelled' %}
                     <span class="badge badge-danger">Đã hủy</span>
                     {% endif %}
+
+                    <a href="{% url 'track_order' order.id %}" class="btn btn-primary"
+                        style="margin-left: 10px; padding: 5px 15px; font-size: 0.9rem;">
+                        Theo dõi đơn hàng
+                    </a>
                 </div>
             </div>
 

@@ -55,9 +55,14 @@ def book_list_view(request):
     elif sort == 'popular':
         books = books.order_by('-sold_quantity')
     
+    base_template = 'base/base.html'
+    if request.user.is_authenticated and hasattr(request.user, 'staff_profile'):
+        base_template = 'base/manager_base.html'
+
     context = {
         'books': books,
-        'categories': CategoryDAO.get_all_categories()
+        'categories': CategoryDAO.get_all_categories(),
+        'base_template': base_template
     }
     
     return render(request, 'books/book_list.html', context)
