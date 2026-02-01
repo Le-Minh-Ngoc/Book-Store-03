@@ -76,3 +76,7 @@ class VoucherDAO:
     def is_valid(voucher):
         today = timezone.now().date()
         return voucher.start_date <= today <= voucher.end_date
+    
+    @staticmethod
+    def is_voucher_valid(voucher):
+        return VoucherDAO.is_valid(voucher)

@@ -35,6 +35,8 @@ urlpatterns = [
     path('orders/', views.order_list_view, name='order_list'),
     path('orders/<str:order_id>/', views.order_detail_view, name='order_detail'),
     path('orders/<str:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+    path('orders/<str:order_id>/track/', views.track_order_view, name='track_order'),
+    path('tracking/', views.track_by_number_view, name='track_by_number'),
     path('voucher/apply/', views.apply_voucher, name='apply_voucher'),
     
     path('warehouse/', views.warehouse_list_view, name='warehouse_list'),
@@ -55,4 +57,22 @@ urlpatterns = [
     path('manager/books/add/', views.manager_add_book_view, name='manager_add_book'),
     path('manager/books/<str:book_id>/edit/', views.manager_edit_book_view, name='manager_edit_book'),
     path('manager/books/<str:book_id>/delete/', views.manager_delete_book_view, name='manager_delete_book'),
+    
+    # Admin URLs
+    path('admin-panel/users/', views.admin_users_list_view, name='admin_users_list'),
+    path('admin-panel/users/<int:user_id>/', views.admin_user_detail_view, name='admin_user_detail'),
+    path('admin-panel/users/<int:user_id>/toggle-status/', views.admin_toggle_user_status, name='admin_toggle_user_status'),
+    path('admin-panel/staff/create/', views.admin_create_staff_view, name='admin_create_staff'),
+    
+    path('admin-panel/orders/', views.admin_orders_list_view, name='admin_orders_list'),
+    path('admin-panel/orders/<str:order_id>/', views.admin_order_detail_view, name='admin_order_detail'),
+    path('admin-panel/orders/<str:order_id>/update-status/', views.admin_update_order_status, name='admin_update_order_status'),
+    
+    path('admin-panel/payments/', views.admin_payments_list_view, name='admin_payments_list'),
+    path('admin-panel/payments/<str:payment_id>/update-status/', views.admin_update_payment_status, name='admin_update_payment_status'),
+    
+    path('admin-panel/shippings/', views.admin_shippings_list_view, name='admin_shippings_list'),
+    path('admin-panel/shippings/<int:shipping_id>/', views.admin_shipping_detail_view, name='admin_shipping_detail'),
+    path('admin-panel/shippings/<int:shipping_id>/update-status/', views.admin_update_shipping_status, name='admin_update_shipping_status'),
+    path('admin-panel/shippings/<int:shipping_id>/assign-shipper/', views.admin_assign_shipper, name='admin_assign_shipper'),
 ]

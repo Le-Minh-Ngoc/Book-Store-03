@@ -5,8 +5,9 @@ import uuid
 class PaymentDAO:
     
     @staticmethod
-    def create_payment(order, amount, method, status='pending'):
-        payment_id = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+    def create_payment(order, amount, method, status='pending', payment_id=None):
+        if payment_id is None:
+            payment_id = f"PAY-{uuid.uuid4().hex[:8].upper()}"
         
         payment = Payment.objects.create(
             id=payment_id,

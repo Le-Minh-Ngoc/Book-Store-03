@@ -12,6 +12,10 @@ class LoginHistoryDAO:
         )
     
     @staticmethod
+    def create_login_history(user, ip_address, device):
+        return LoginHistoryDAO.create_login_record(user, ip_address, device)
+    
+    @staticmethod
     def get_user_login_history(user, limit=20):
         return user.login_histories.all()[:limit]
     
@@ -36,6 +40,10 @@ class SearchHistoryDAO:
             user=user,
             query=query
         )
+    
+    @staticmethod
+    def create_search_history(user, query):
+        return SearchHistoryDAO.create_search_record(user, query)
     
     @staticmethod
     def get_user_search_history(user, limit=50):

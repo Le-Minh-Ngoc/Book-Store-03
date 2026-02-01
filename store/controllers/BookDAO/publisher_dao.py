@@ -39,8 +39,9 @@ class PublisherDAO:
         publisher.delete()
     
     @staticmethod
-    def get_publisher_books(publisher_id):
-        publisher = Publisher.objects.get(id=publisher_id)
+    def get_publisher_books(publisher):
+        if isinstance(publisher, str):
+            publisher = Publisher.objects.get(id=publisher)
         return publisher.books.all()
     
     @staticmethod

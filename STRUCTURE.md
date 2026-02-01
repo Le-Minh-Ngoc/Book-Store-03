@@ -18,17 +18,21 @@ bookstore03/
     │   ├── order_models.py  # Models cho Order, Cart, Payment, etc.
     │   └── warehouse_models.py  # Models cho Warehouse, ImportSlip, etc.
     │
-    ├── views/               # VIEWS - Lop giao dien
+    ├── views/               # VIEWS - Lop giao dien (da duoc tach)
     │   ├── user_views.py    # Views cho authentication va user management
     │   ├── book_views.py    # Views cho book catalog va search
     │   ├── order_views.py   # Views cho cart va ordering
-    │   └── warehouse_views.py  # Views cho warehouse management
+    │   ├── warehouse_views.py  # Views cho warehouse management
+    │   ├── recommendation_views.py  # Views cho recommendation
+    │   └── manager_views.py  # Views cho manager dashboard
+    ├── services/            # SERVICES - Cac logic phuc tap (Recommendation, etc.)
     │
-    ├── controllers/         # CONTROLLERS - Lop logic nghiep vu
-    │   ├── user_controllers.py     # Business logic cho users
-    │   ├── book_controllers.py     # Business logic cho books
-    │   ├── order_controllers.py    # Business logic cho orders
-    │   └── warehouse_controllers.py # Business logic cho warehouse
+    ├── controllers/         # DAOs & CONTROLLERS - Lop truy xuat du lieu
+    │   ├── UserDAO/         # DAOs cho users (user_dao.py, etc.)
+    │   ├── BookDAO/         # DAOs cho books (book_dao.py, author_dao.py...)
+    │   ├── OrderDAO/        # DAOs cho orders (order_dao.py, cart_dao.py...)
+    │   ├── CartDAO/         # DAOs cho cart
+    │   └── WarehouseDAO/    # DAOs cho warehouse
     │
     ├── templates/           # HTML templates
     ├── admin.py            # Django admin configuration
@@ -39,6 +43,7 @@ bookstore03/
 ## Cac Models
 
 ### User Models (user_models.py)
+
 - User: Nguoi dung he thong (ke thua AbstractUser)
 - Customer: Khach hang
 - Staff: Nhan vien
@@ -54,6 +59,7 @@ bookstore03/
 - Notification: Thong bao
 
 ### Book Models (book_models.py)
+
 - Category: The loai sach
 - Publisher: Nha xuat ban
 - Author: Tac gia
@@ -67,6 +73,7 @@ bookstore03/
 - DamagedBook: Sach bi hong
 
 ### Order Models (order_models.py)
+
 - Cart: Gio hang
 - CartItem: San pham trong gio hang
 - Order: Don hang
@@ -85,93 +92,108 @@ bookstore03/
 - Tracking: Theo doi van chuyen
 
 ### Warehouse Models (warehouse_models.py)
+
 - Warehouse: Kho hang
 - ImportSlip: Phieu nhap kho
 - ImportSlipDetail: Chi tiet phieu nhap kho
 
-## Cac Views
+## Cac Views (da duoc tach thanh cac module rieng biet)
 
-### User Views
-- Dang ky, dang nhap, dang xuat
-- Quan ly thong tin ca nhan
-- Quan ly dia chi
-- Xem thong bao
-- Lich su dang nhap va tim kiem
+### User Views (store/views/user_views.py)
 
-### Book Views
-- Danh sach sach
-- Chi tiet sach
-- Tim kiem sach
-- Danh gia va binh luan
-- Wishlist
-- Danh sach tac gia, nha xuat ban, the loai
+- Dang ky, dang nhap, dang xuat (su dung UserDAO, CustomerDAO)
+- Quan ly thong tin ca nhan (su dung UserDAO)
+- Quan ly dia chi (su dung CustomerDAO)
+- Xem thong bao (su dung NotificationDAO)
+- Lich su dang nhap va tim kiem (su dung LoginHistoryDAO, SearchHistoryDAO)
 
-### Order Views
-- Gio hang
-- Checkout
-- Dat hang
-- Quan ly don hang
-- Ap dung voucher
-- Huy don hang
+### Book Views (store/views/book_views.py)
 
-### Warehouse Views
-- Quan ly kho
-- Phieu nhap kho
-- Ton kho
+- Danh sach sach (su dung BookDAO, CategoryDAO)
+- Chi tiet sach (su dung BookDAO, ReviewDAO, CommentDAO)
+- Tim kiem sach (su dung BookDAO, SearchHistoryDAO)
+- Danh gia va binh luan (su dung ReviewDAO, CommentDAO)
+- Wishlist (su dung WishlistDAO)
+- Danh sach tac gia, nha xuat ban, the loai (su dung AuthorDAO, PublisherDAO, CategoryDAO)
 
-## Cac Controllers
+### Order Views (store/views/order_views.py)
 
-### User Controllers
-- UserController: Quan ly nguoi dung
-- CustomerController: Quan ly khach hang
-- StaffController: Quan ly nhan vien
-- LoginHistoryController: Quan ly lich su dang nhap
+- Gio hang (su dung CartDAO)
+- Checkout (su dung CartDAO, CustomerDAO)
+- Dat hang (su dung OrderDAO, CartDAO, BookDAO, PaymentDAO)
+- Quan ly don hang (su dung OrderDAO)
+- Ap dung voucher (su dung VoucherDAO)
+- Huy don hang (su dung OrderDAO)
 
-### Book Controllers
-- BookController: Quan ly sach
-- CategoryController: Quan ly the loai
-- AuthorController: Quan ly tac gia
-- PublisherController: Quan ly nha xuat ban
-- ReviewController: Quan ly danh gia
-- WishlistController: Quan ly wishlist
-- DamagedBookController: Quan ly sach hong
+### Warehouse Views (store/views/warehouse_views.py)
 
-### Order Controllers
-- CartController: Quan ly gio hang
-- OrderController: Quan ly don hang
-- PaymentController: Quan ly thanh toan
-- InvoiceController: Quan ly hoa don
-- VoucherController: Quan ly voucher
-- ShippingController: Quan ly van chuyen
+- Quan ly kho (su dung WarehouseDAO)
+- Phieu nhap kho (su dung ImportSlipDAO)
+- Ton kho (su dung BookDAO)
 
-### Warehouse Controllers
-- WarehouseController: Quan ly kho
-- ImportSlipController: Quan ly phieu nhap
-- SupplierController: Quan ly nha cung cap
-- InventoryController: Quan ly ton kho
+### Manager Views (store/views/manager_views.py)
+
+- Dashboard (su dung BookDAO, DamagedBookDAO)
+- Quan ly sach (su dung BookDAO, CategoryDAO)
+- Kiem tra ton kho (su dung BookDAO)
+- Quan ly sach hong (su dung DamagedBookDAO)
+
+### Recommendation Views (store/views/recommendation_views.py)
+
+- Goi y sach (su dung BookRecommendationService)
+
+## Cac Controllers & DAOs
+
+(Hien tai du an dang trien khai theo mo hinh DAO pattern trong thu muc controllers)
+
+### User DAOs (store/controllers/UserDAO)
+
+- UserDAO: Truu tuong hoa truy xuat User
+- CustomerDAO, StaffDAO...
+
+### Book DAOs (store/controllers/BookDAO)
+
+- BookDAO: Quan ly truy xuat sach
+- CategoryDAO, AuthorDAO, PublisherDAO...
+
+### Order DAOs (store/controllers/OrderDAO)
+
+- CartDAO: Quan ly gio hang
+- OrderDAO: Quan ly don hang
+- PaymentDAO...
+
+### Warehouse DAOs (store/controllers/WarehouseDAO)
+
+- WarehouseDAO
+- ImportSlipDAO...
 
 ## Cai dat va Chay du an
 
 1. Tao migration:
+
 ```bash
 python manage.py makemigrations
 ```
 
 2. Chay migration:
+
 ```bash
 python manage.py migrate
 ```
 
 3. Tao superuser:
+
 ```bash
 python manage.py createsuperuser
 ```
 
 4. Chay server:
+
 ```bash
 python manage.py runserver
 ```
 
 5. Truy cap:
+
 - Website: http://127.0.0.1:8000/
 - Admin: http://127.0.0.1:8000/admin/

@@ -43,8 +43,9 @@ class AuthorDAO:
         author.delete()
     
     @staticmethod
-    def get_author_books(author_id):
-        author = Author.objects.get(id=author_id)
+    def get_author_books(author):
+        if isinstance(author, str):
+            author = Author.objects.get(id=author)
         return author.books.all()
     
     @staticmethod
