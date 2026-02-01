@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BookStore - Cửa hàng sách trực tuyến{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">BookStore</div>
+            <ul class="nav-links">
+                <li><a href="{% url 'book_list' %}">Sách</a></li>
+                <li><a href="{% url 'category_list' %}">Thể loại</a></li>
+                <li><a href="{% url 'author_list' %}">Tác giả</a></li>
+                <li><a href="{% url 'recommendations' %}">Gợi ý</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'cart' %}">Giỏ hàng</a></li>
+                <li><a href="{% url 'order_list' %}">Đơn hàng</a></li>
+                <li><a href="{% url 'wishlist' %}">Yêu thích</a></li>
+                <li><a href="{% url 'profile' %}">{{ user.username }}</a></li>
+                <li><a href="{% url 'logout' %}">Đăng xuất</a></li>
+                {% else %}
+                <li><a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập</a></li>
+                <li><a href="{% url 'register' %}" class="btn btn-secondary">Đăng ký</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 BookStore. Tất cả quyền được bảo lưu.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

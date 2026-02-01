@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ author.name }} - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <div class="card" style="max-width: 900px; margin: 0 auto 2rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div
+                style="width: 150px; height: 150px; margin: 0 auto 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">
+                {{ author.name|slice:":1" }}
+            </div>
+            <h1 style="margin-bottom: 0.5rem;">{{ author.name }}</h1>
+            <p style="color: #666; font-size: 1.1rem;">{{ author.country }}</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div>
+                <strong>Ngày sinh:</strong>
+                <p>{{ author.birthdate }}</p>
+            </div>
+            <div>
+                <strong>Địa chỉ:</strong>
+                <p>{{ author.address }}</p>
+            </div>
+        </div>
+
+        {% if author.biography %}
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f9f9f9; border-radius: 10px;">
+            <h3 style="margin-bottom: 1rem;">Tiểu sử</h3>
+            <p style="line-height: 1.6; color: #666;">{{ author.biography }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: white;">Tác phẩm của {{ author.name }}</h2>
+
+        <div class="grid grid-4">
+            {% for book in books %}
+            <div class="card">
+                <div
+                    style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; margin-bottom: 1rem;">
+                    {{ book.title|truncatewords:3 }}
+                </div>
+
+                <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">{{ book.title|truncatewords:5 }}</h3>
+                <p style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 1rem;">
+                    {{ book.price }} VNĐ
+                </p>
+
+                <a href="{% url 'book_detail' book.id %}" class="btn btn-primary"
+                    style="width: 100%; text-align: center;">
+                    Xem chi tiết
+                </a>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p style="font-size: 1.2rem; color: white;">Chưa có tác phẩm nào.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Nhà xuất bản - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Nhà xuất bản
+    </h1>
+
+    <div class="grid grid-3">
+        {% for publisher in publishers %}
+        <a href="{% url 'publisher_detail' publisher.id %}" style="text-decoration: none;">
+            <div class="card" style="text-align: center; cursor: pointer;">
+                <div
+                    style="height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; padding: 1rem; margin-bottom: 1rem;">
+                    {{ publisher.name }}
+                </div>
+                <p style="color: #666; font-size: 0.9rem;">{{ publisher.address }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

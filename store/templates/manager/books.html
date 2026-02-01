@@ -1,0 +1,148 @@
+{% extends 'base/manager_base.html' %}
+{% load humanize %}
+
+{% block title %}Quản lý sách - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            Quản lý sách
+        </h1>
+        <a href="{% url 'manager_add_book' %}" class="btn btn-primary">
+            Thêm sách mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <form method="GET" action="{% url 'manager_books' %}">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="search">Tìm kiếm</label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Tên sách, tác giả..."
+                        value="{{ request.GET.search }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="category">Thể loại</label>
+                    <select class="form-control" id="category" name="category">
+                        <option value="">Tất cả</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.type }}" {% if request.GET.category==cat.type %}selected{% endif %}>
+                            {{ cat.type }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="stock_status">Trạng thái kho</label>
+                    <select class="form-control" id="stock_status" name="stock_status">
+                        <option value="">Tất cả</option>
+                        <option value="in_stock" {% if request.GET.stock_status=='in_stock' %}selected{% endif %}>Còn
+                            hàng</option>
+                        <option value="low_stock" {% if request.GET.stock_status=='low_stock' %}selected{% endif %}>Sắp
+                            hết</option>
+                        <option value="out_of_stock" {% if request.GET.stock_status=='out_of_stock' %}selected{% endif
+                            %}>Hết hàng</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Books Table -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: left;">
+                    <th style="padding: 1.2rem; font-weight: 700;">Hình ảnh</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Mã sách</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Tên sách</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Giá</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Tồn kho</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Đã bán</th>
+                    <th style="padding: 1.2rem; font-weight: 700;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr style="border-bottom: 1px solid #e8e8e8;">
+                    <td style="padding: 1rem;">
+                        {% if book.image_url %}
+                        <img src="{{ book.image_url }}" alt="{{ book.title }}"
+                            style="width: 60px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        {% else %}
+                        <div
+                            style="width: 60px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 6px;">
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem; color: #666; font-family: monospace;">{{ book.id }}</td>
+                    <td style="padding: 1rem; font-weight: 600; max-width: 300px;">
+                        {{ book.title|truncatewords:10 }}
+                        <div style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">
+                            {{ book.authors.all|join:", "|truncatewords:3 }}
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; color: #667eea; font-weight: 700;">
+                        <span class="price-value">{{ book.price|floatformat:0|intcomma }}</span> VNĐ
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if book.quantity == 0 %}
+                        <span
+                            style="background: #f8d7da; color: #721c24; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                            Hết hàng
+                        </span>
+                        {% elif book.quantity < 10 %} <span
+                            style="background: #fff3cd; color: #856404; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                            {{ book.quantity }}
+                            </span>
+                            {% else %}
+                            <span
+                                style="background: #d4edda; color: #155724; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                                {{ book.quantity }}
+                            </span>
+                            {% endif %}
+                    </td>
+                    <td style="padding: 1rem; color: #666; font-weight: 600;">{{ book.sold_quantity }}</td>
+                    <td style="padding: 1rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{% url 'manager_edit_book' book.id %}" class="btn btn-secondary"
+                                style="padding: 8px 16px; font-size: 0.9rem;">
+                                Sửa
+                            </a>
+                            <a href="{% url 'manager_delete_book' book.id %}" class="btn"
+                                style="padding: 8px 16px; font-size: 0.9rem; background: #dc3545; color: white;"
+                                onclick="return confirm('Bạn có chắc muốn xóa sách này?');">
+                                Xóa
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 3rem; text-align: center; color: #999;">
+                        Không tìm thấy sách nào
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Replace comma with dot for Vietnamese currency format
+    document.addEventListener('DOMContentLoaded', function () {
+        const prices = document.querySelectorAll('.price-value');
+        prices.forEach(function (price) {
+            price.textContent = price.textContent.replace(/,/g, '.');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block title %}Danh sách sách - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Danh sách sách
+    </h1>
+
+    <div style="max-width: 600px; margin: 0 auto 2rem;">
+        <form method="GET" action="{% url 'book_list' %}">
+            <div class="search-box">
+                <input type="text" name="search" placeholder="Tìm theo tên sách, tác giả hoặc nhà xuất bản..."
+                    value="{{ request.GET.search }}">
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-4">
+        {% for book in books %}
+        <div class="card">
+            {% if book.image_url %}
+            <div style="height: 350px; margin-bottom: 1rem; overflow: hidden; border-radius: 12px; position: relative;">
+                <img src="{{ book.image_url }}" alt="{{ book.title }}"
+                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;"
+                    onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            </div>
+            {% else %}
+            <div
+                style="height: 350px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; margin-bottom: 1rem; padding: 1.5rem; text-align: center;">
+                {{ book.title|truncatewords:4 }}
+            </div>
+            {% endif %}
+
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem; min-height: 2.5rem; line-height: 1.3;">
+                {{ book.title|truncatewords:6 }}
+            </h3>
+            <p style="color: #888; margin-bottom: 0.5rem; font-size: 0.9rem; min-height: 1.5rem;">
+                {{ book.authors.all|join:", "|truncatewords:2 }}
+            </p>
+            <p
+                style="font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem;">
+                <span class="price-value">{{ book.price|floatformat:0|intcomma }}</span> VNĐ
+            </p>
+
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                {% if book.quantity > 0 %}
+                <span class="badge badge-success">Còn hàng</span>
+                {% else %}
+                <span class="badge badge-danger">Hết hàng</span>
+                {% endif %}
+                <span class="badge badge-info">Đã bán: {{ book.sold_quantity }}</span>
+            </div>
+
+            <a href="{% url 'book_detail' book.id %}" class="btn btn-primary"
+                style="width: 100%; text-align: center; text-decoration: none; display: block;">
+                Xem chi tiết
+            </a>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p style="font-size: 1.2rem; color: white;">Không tìm thấy sách nào.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Replace comma with dot for Vietnamese currency format
+    document.addEventListener('DOMContentLoaded', function () {
+        const prices = document.querySelectorAll('.price-value');
+        prices.forEach(function (price) {
+            price.textContent = price.textContent.replace(/,/g, '.');
+        });
+    });
+</script>
+{% endblock %}

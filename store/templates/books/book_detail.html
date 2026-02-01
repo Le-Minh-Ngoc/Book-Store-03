@@ -1,0 +1,158 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ book.title }} - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+            <div>
+                <div
+                    style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; padding: 2rem; text-align: center;">
+                    {{ book.title }}
+                </div>
+            </div>
+
+            <div>
+                <h1 style="margin-bottom: 1rem; color: #333;">{{ book.title }}</h1>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Tác giả:</strong>
+                    {% for author in book.authors.all %}
+                    <a href="{% url 'author_detail' author.id %}" style="color: #667eea;">{{ author.name }}</a>
+                    {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Nhà xuất bản:</strong>
+                    <a href="{% url 'publisher_detail' book.publisher.id %}" style="color: #667eea;">{{
+                        book.publisher.name }}</a>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Thể loại:</strong>
+                    {% for category in book.categories.all %}
+                    <span class="badge badge-info">{{ category.type }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>ISBN:</strong> {{ book.ISBN }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Năm xuất bản:</strong> {{ book.published_year }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Số trang:</strong> {{ book.page_count }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Ngôn ngữ:</strong> {{ book.language }}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    {% if book.quantity > 0 %}
+                    <span class="badge badge-success">Còn hàng: {{ book.quantity }}</span>
+                    {% else %}
+                    <span class="badge badge-danger">Hết hàng</span>
+                    {% endif %}
+                    <span class="badge badge-info">Đã bán: {{ book.sold_quantity }}</span>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    {% if avg_rating %}
+                    <strong>Đánh giá:</strong> {{ avg_rating|floatformat:1 }} / 5.0
+                    {% endif %}
+                </div>
+
+                <p style="font-size: 2rem; font-weight: bold; color: #667eea; margin-bottom: 1.5rem;">
+                    {{ book.price }} VNĐ
+                </p>
+
+                <div style="display: flex; gap: 1rem;">
+                    {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'add_to_cart' book.id %}" style="flex: 1;">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="1" min="1" max="{{ book.quantity }}"
+                            class="form-control" style="margin-bottom: 0.5rem;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Thêm vào giỏ hàng
+                        </button>
+                    </form>
+
+                    <button onclick="toggleWishlist('{{ book.id }}')" class="btn btn-secondary">
+                        {% if is_in_wishlist %}Xóa khỏi yêu thích{% else %}Thêm vào yêu thích{% endif %}
+                    </button>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập để mua</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if book.description %}
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f0f0f0;">
+            <h3 style="margin-bottom: 1rem;">Mô tả</h3>
+            <p style="line-height: 1.6; color: #666;">{{ book.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 2rem auto;">
+        <h3 style="margin-bottom: 1.5rem;">Đánh giá</h3>
+
+        {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'add_review' book.id %}"
+            style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #f0f0f0;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Số sao</label>
+                <select name="rating" class="form-control" required>
+                    <option value="5">5 sao</option>
+                    <option value="4">4 sao</option>
+                    <option value="3">3 sao</option>
+                    <option value="2">2 sao</option>
+                    <option value="1">1 sao</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Bình luận</label>
+                <textarea name="comment" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+        </form>
+        {% endif %}
+
+        {% for review in reviews %}
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f0f0f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <strong>{{ review.customer.user.username }}</strong>
+                <span style="color: #ffc107; font-weight: bold;">{{ review.rating }} sao</span>
+            </div>
+            <p style="color: #666;">{{ review.comment }}</p>
+            <small style="color: #999;">{{ review.created_at }}</small>
+        </div>
+        {% empty %}
+        <p style="color: #666;">Chưa có đánh giá nào.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleWishlist(bookId) {
+        fetch(`/books/${bookId}/wishlist/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                location.reload();
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Cập nhật địa chỉ - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            Cập nhật địa chỉ
+        </h1>
+
+        <div class="card">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'update_address' address.id %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="num">Số nhà <span style="color: #dc3545;">*</span></label>
+                    <input type="text" class="form-control" id="num" name="num" value="{{ address.num }}"
+                        placeholder="Ví dụ: 123" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="street">Đường/Phố <span style="color: #dc3545;">*</span></label>
+                    <input type="text" class="form-control" id="street" name="street" value="{{ address.street }}"
+                        placeholder="Ví dụ: Nguyễn Trãi" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Thành phố/Tỉnh <span style="color: #dc3545;">*</span></label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ address.city }}"
+                        placeholder="Ví dụ: Hà Nội" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="country">Quốc gia <span style="color: #dc3545;">*</span></label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ address.country }}"
+                        readonly>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <a href="{% url 'profile' %}" class="btn btn-secondary"
+                        style="flex: 1; text-align: center; text-decoration: none;">
+                        Hủy
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

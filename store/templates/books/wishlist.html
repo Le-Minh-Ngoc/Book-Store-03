@@ -1,0 +1,54 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Danh sách yêu thích - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Danh sách yêu thích
+    </h1>
+
+    <div class="grid grid-4">
+        {% for item in wishlist_items %}
+        <div class="card">
+            <div
+                style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; margin-bottom: 1rem;">
+                {{ item.book.title|truncatewords:3 }}
+            </div>
+
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">{{ item.book.title|truncatewords:5 }}</h3>
+            <p style="color: #666; margin-bottom: 0.5rem;">{{ item.book.authors.all|join:", " }}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 1rem;">
+                {{ item.book.price }} VNĐ
+            </p>
+
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                {% if item.book.quantity > 0 %}
+                <span class="badge badge-success">Còn hàng</span>
+                {% else %}
+                <span class="badge badge-danger">Hết hàng</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'book_detail' item.book.id %}" class="btn btn-primary"
+                    style="flex: 1; text-align: center;">
+                    Xem chi tiết
+                </a>
+                <form method="POST" action="{% url 'toggle_wishlist' item.book.id %}" style="flex: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" style="background: #dc3545; border-color: #dc3545;">
+                        Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p style="font-size: 1.2rem; color: white; margin-bottom: 1.5rem;">Danh sách yêu thích trống.</p>
+            <a href="{% url 'book_list' %}" class="btn btn-primary">Khám phá sách</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

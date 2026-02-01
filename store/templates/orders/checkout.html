@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Thanh toán - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Thanh toán
+    </h1>
+
+    <div style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">Thông tin đơn hàng</h3>
+
+            {% for item in cart_items %}
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0;">
+                <div>
+                    <strong>{{ item.book.title }}</strong>
+                    <p style="color: #666; font-size: 0.9rem;">Số lượng: {{ item.quantity }}</p>
+                </div>
+                <div style="font-weight: bold; color: #667eea;">
+                    {{ item.book.price }} VNĐ
+                </div>
+            </div>
+            {% endfor %}
+
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
+                    <span>Tổng cộng:</span>
+                    <span style="color: #667eea;">{{ total }} VNĐ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">Thông tin giao hàng</h3>
+
+            <form method="POST" action="{% url 'place_order' %}" id="checkoutForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Chọn địa chỉ</label>
+                    <select name="address" class="form-control" required>
+                        {% for address in addresses %}
+                        <option value="{{ address.id }}">
+                            {{ address.num }} {{ address.street }}, {{ address.city }}, {{ address.country }}
+                        </option>
+                        {% empty %}
+                        <option value="">Chưa có địa chỉ</option>
+                        {% endfor %}
+                    </select>
+                    <a href="{% url 'add_address' %}"
+                        style="color: #667eea; font-size: 0.9rem; margin-top: 0.5rem; display: inline-block;">
+                        Thêm địa chỉ mới
+                    </a>
+                </div>
+
+                <div class="form-group">
+                    <label>Phương thức thanh toán</label>
+                    <select name="payment_method" class="form-control" required>
+                        <option value="cash">Tiền mặt khi nhận hàng</option>
+                        <option value="bank">Chuyển khoản ngân hàng</option>
+                        <option value="credit_card">Thẻ tín dụng</option>
+                        <option value="e_wallet">Ví điện tử</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mã giảm giá (nếu có)</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="voucher_code" class="form-control" placeholder="Nhập mã giảm giá">
+                        <button type="button" class="btn btn-secondary" onclick="applyVoucher()">Áp dụng</button>
+                    </div>
+                    <div id="voucher_result" style="margin-top: 0.5rem;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; margin-top: 1rem; font-size: 1.1rem; padding: 15px;">
+                    Xác nhận đặt hàng
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function applyVoucher() {
+        const code = document.getElementById('voucher_code').value;
+        const resultDiv = document.getElementById('voucher_result');
+
+        fetch('{% url "apply_voucher" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `code=${code}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `<div class="alert alert-success">Giảm giá ${data.discount_percent}%</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-error">${data.error}</div>`;
+                }
+            });
+    }
+</script>
+{% endblock %}

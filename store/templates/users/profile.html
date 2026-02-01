@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Hồ sơ của tôi - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Hồ sơ của tôi
+    </h1>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">Thông tin cá nhân</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <strong>Tên đăng nhập:</strong>
+                    <p>{{ user.username }}</p>
+                </div>
+                <div>
+                    <strong>Email:</strong>
+                    <p>{{ user.email }}</p>
+                </div>
+                <div>
+                    <strong>Họ và tên:</strong>
+                    <p>{{ user.fullname }}</p>
+                </div>
+                <div>
+                    <strong>Số điện thoại:</strong>
+                    <p>{{ user.tel }}</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <a href="{% url 'update_profile' %}" class="btn btn-primary">Cập nhật thông tin</a>
+            </div>
+        </div>
+
+        {% if customer %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">Địa chỉ giao hàng</h3>
+
+            {% if addresses %}
+            {% for address in addresses %}
+            <div style="padding: 1rem; border: 1px solid #e0e0e0; border-radius: 5px; margin-bottom: 1rem;">
+                <p><strong>{{ address.num }} {{ address.street }}</strong></p>
+                <p style="color: #666;">{{ address.city }}, {{ address.country }}</p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color: #666;">Chưa có địa chỉ nào.</p>
+            {% endif %}
+
+            <div style="margin-top: 1rem;">
+                <a href="{% url 'add_address' %}" class="btn btn-secondary">Thêm địa chỉ mới</a>
+            </div>
+        </div>
+
+        {% if memberships %}
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">Thẻ thành viên</h3>
+
+            {% for membership in memberships %}
+            <div
+                style="padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; margin-bottom: 1rem;">
+                <p><strong>{{ membership.rank }}</strong></p>
+                <p style="font-size: 0.9rem;">Điểm tích lũy: {{ membership.point }}</p>
+                <p style="font-size: 0.9rem;">Ngày hết hạn: {{ membership.expired_date }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

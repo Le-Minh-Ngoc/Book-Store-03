@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Chi tiết đơn hàng - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Chi tiết đơn hàng #{{ order.id }}
+    </h1>
+
+    <div style="max-width: 900px; margin: 0 auto;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f0f0f0;">
+                <div>
+                    <h3>Thông tin đơn hàng</h3>
+                    <p style="color: #666; margin-top: 0.5rem;">Ngày đặt: {{ order.created_at }}</p>
+                </div>
+                <div>
+                    {% if order.status == 'pending' %}
+                    <span class="badge badge-warning">Chờ xử lý</span>
+                    {% elif order.status == 'processing' %}
+                    <span class="badge badge-info">Đang xử lý</span>
+                    {% elif order.status == 'shipped' %}
+                    <span class="badge badge-info">Đang giao</span>
+                    {% elif order.status == 'delivered' %}
+                    <span class="badge badge-success">Đã giao</span>
+                    {% elif order.status == 'cancelled' %}
+                    <span class="badge badge-danger">Đã hủy</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h4 style="margin-bottom: 1rem;">Sản phẩm</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #f0f0f0;">
+                        <th style="padding: 1rem; text-align: left;">Sách</th>
+                        <th style="padding: 1rem; text-align: center;">Giá</th>
+                        <th style="padding: 1rem; text-align: center;">Số lượng</th>
+                        <th style="padding: 1rem; text-align: center;">Tổng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 1rem;">
+                            <a href="{% url 'book_detail' item.book.id %}" style="color: #667eea; font-weight: 600;">
+                                {{ item.book.title }}
+                            </a>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">{{ item.price }} VNĐ</td>
+                        <td style="padding: 1rem; text-align: center;">{{ item.quantity }}</td>
+                        <td style="padding: 1rem; text-align: center; font-weight: bold; color: #667eea;">
+                            {{ item.price }} VNĐ
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="text-align: right; padding-top: 1.5rem; border-top: 2px solid #f0f0f0;">
+                <p style="font-size: 1.5rem; font-weight: bold;">
+                    Tổng cộng: <span style="color: #667eea;">{{ order.total }} VNĐ</span>
+                </p>
+            </div>
+        </div>
+
+        {% if payment %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <h4 style="margin-bottom: 1rem;">Thông tin thanh toán</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <strong>Phương thức:</strong>
+                    <p>{{ payment.method }}</p>
+                </div>
+                <div>
+                    <strong>Trạng thái:</strong>
+                    <p>
+                        {% if payment.status == 'pending' %}
+                        <span class="badge badge-warning">Chờ thanh toán</span>
+                        {% elif payment.status == 'completed' %}
+                        <span class="badge badge-success">Đã thanh toán</span>
+                        {% elif payment.status == 'failed' %}
+                        <span class="badge badge-danger">Thất bại</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if shipping %}
+        <div class="card">
+            <h4 style="margin-bottom: 1rem;">Thông tin vận chuyển</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <strong>Phương thức:</strong>
+                    <p>{{ shipping.method }}</p>
+                </div>
+                <div>
+                    <strong>Trạng thái:</strong>
+                    <p>{{ shipping.status }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="{% url 'order_list' %}" class="btn btn-secondary">Quay lại danh sách</a>
+            {% if order.status == 'pending' or order.status == 'processing' %}
+            <form method="POST" action="{% url 'cancel_order' order.id %}" style="display: inline; margin-left: 1rem;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary" style="background: #dc3545; border-color: #dc3545;"
+                    onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                    Hủy đơn hàng
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

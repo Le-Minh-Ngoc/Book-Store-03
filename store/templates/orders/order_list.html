@@ -1,0 +1,66 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Đơn hàng của tôi - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <h1 style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Đơn hàng của tôi
+    </h1>
+
+    <div style="max-width: 1000px; margin: 0 auto;">
+        {% if orders %}
+        {% for order in orders %}
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;">
+                <div>
+                    <h3 style="margin-bottom: 0.5rem;">Đơn hàng #{{ order.id }}</h3>
+                    <p style="color: #666; font-size: 0.9rem;">Ngày đặt: {{ order.created_at }}</p>
+                </div>
+                <div>
+                    {% if order.status == 'pending' %}
+                    <span class="badge badge-warning">Chờ xử lý</span>
+                    {% elif order.status == 'processing' %}
+                    <span class="badge badge-info">Đang xử lý</span>
+                    {% elif order.status == 'shipped' %}
+                    <span class="badge badge-info">Đang giao</span>
+                    {% elif order.status == 'delivered' %}
+                    <span class="badge badge-success">Đã giao</span>
+                    {% elif order.status == 'cancelled' %}
+                    <span class="badge badge-danger">Đã hủy</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <strong>Tổng tiền:</strong>
+                <span style="color: #667eea; font-weight: bold; font-size: 1.2rem;">{{ order.total }} VNĐ</span>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-primary">
+                    Xem chi tiết
+                </a>
+
+                {% if order.status == 'pending' or order.status == 'processing' %}
+                <form method="POST" action="{% url 'cancel_order' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" style="background: #dc3545; border-color: #dc3545;"
+                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                        Hủy đơn hàng
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 1.5rem;">Bạn chưa có đơn hàng nào.</p>
+            <a href="{% url 'book_list' %}" class="btn btn-primary">Bắt đầu mua sắm</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
