@@ -1,0 +1,61 @@
+{% extends 'base/admin_base.html' %}
+{% load humanize %}
+
+{% block title %}Quản lý vận chuyển - Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="color: #1a2980; font-size: 1.8rem;">Quản lý vận chuyển</h1>
+</div>
+
+<div class="admin-card">
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã Shipping</th>
+                    <th>Đơn hàng</th>
+                    <th>Địa chỉ giao</th>
+                    <th>Shipper</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipping in shippings %}
+                <tr>
+                    <td>{{ shipping.id }}</td>
+                    <td><a href="{% url 'admin_order_detail' shipping.order.id %}">{{ shipping.order.id }}</a></td>
+                    <td style="max-width: 300px;">
+                        {% if shipping.address %}
+                            {{ shipping.address.num }} {{ shipping.address.street }}, {{ shipping.address.city }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if shipping.shipper %}
+                            {{ shipping.shipper.staff.user.fullname }}
+                        {% else %}
+                            <span style="color: #999;">Chưa phân công</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                         <span class="status-badge {% if shipping.status == 'delivered' %}status-success{% elif shipping.status == 'shipping' %}status-info{% else %}status-warning{% endif %}">
+                            {{ shipping.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_shipping_detail' shipping.id %}" class="btn-action btn-view">Chi tiết</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">Không có thông tin vận chuyển nào.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

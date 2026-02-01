@@ -1,0 +1,92 @@
+{% extends 'base/admin_base.html' %}
+{% load humanize %}
+
+{% block title %}Chi tiết đơn hàng - Admin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_orders_list' %}" class="btn-action btn-view">&larr; Quay lại danh sách</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <!-- Order Items -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1a2980;">Chi tiết đơn hàng: #{{ order.id }}</h3>
+            <span style="font-weight: bold; color: #6c757d;">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+        </div>
+
+        <table style="margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>SL</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td style="display: flex; align-items: center; gap: 10px;">
+                        {% if item.book.image_url %}
+                        <img src="{{ item.book.image_url }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        {% endif %}
+                        <div>
+                            <div style="font-weight: 600;">{{ item.book.title }}</div>
+                            <small>{{ item.book.authors.all|join:", " }}</small>
+                        </div>
+                    </td>
+                    <td>{{ item.price|floatformat:0|intcomma }}</td>
+                    <td>x{{ item.quantity }}</td>
+                    <td style="font-weight: bold;">{% widthratio item.price 1 item.quantity %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">Tổng cộng:</td>
+                    <td style="font-weight: bold; font-size: 1.1rem; color: #1a2980;">{{ order.total|floatformat:0|intcomma }} VNĐ</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Order Info -->
+    <div>
+        <div class="admin-card">
+            <h3 style="margin-top: 0; color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Thông tin khách hàng</h3>
+            <p><strong>Họ tên:</strong> <a href="{% url 'admin_user_detail' order.customer.user.id %}">{{ order.customer.user.fullname }}</a></p>
+            <p><strong>Email:</strong> {{ order.customer.user.email }}</p>
+            <p><strong>Điện thoại:</strong> {{ order.customer.tel }}</p>
+            
+            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee;">Địa chỉ giao hàng</h4>
+            <p style="margin-top: 10px;">{{ order.shipping.id }}</p> (Cần fix hiển thị Address object nếu __str__ không đủ)
+        </div>
+
+        <div class="admin-card">
+            <h3 style="margin-top: 0; color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Trạng thái đơn hàng</h3>
+            
+            <form method="POST" action="{% url 'admin_update_order_status' order.id %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Cập nhật trạng thái:</label>
+                    <select name="status" class="form-control" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Chờ xử lý</option>
+                        <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Đã xác nhận</option>
+                        <option value="shipping" {% if order.status == 'shipping' %}selected{% endif %}>Đang giao</option>
+                        <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Hoàn thành</option>
+                        <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-action btn-edit" style="width: 100%; border: none; cursor: pointer; padding: 10px;">Cập nhật</button>
+            </form>
+            
+            <div style="margin-top: 20px;">
+                <p><strong>Thanh toán:</strong> {{ order.payment.status|default:"Pending" }}</p>
+                <p><strong>Vận chuyển:</strong> {{ order.shipping.status|default:"Processing" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -59,6 +59,7 @@ urlpatterns = [
     path('manager/books/<str:book_id>/delete/', views.manager_delete_book_view, name='manager_delete_book'),
     
     # Admin URLs
+    path('admin-panel/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-panel/users/', views.admin_users_list_view, name='admin_users_list'),
     path('admin-panel/users/<int:user_id>/', views.admin_user_detail_view, name='admin_user_detail'),
     path('admin-panel/users/<int:user_id>/toggle-status/', views.admin_toggle_user_status, name='admin_toggle_user_status'),

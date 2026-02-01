@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - BookStore{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Admin specific styles */
+        :root {
+            --admin-primary: #1a2980;
+            --admin-secondary: #26d0ce;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--admin-primary), var(--admin-secondary)) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-success { background: #d4edda; color: #155724; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .status-danger { background: #f8d7da; color: #721c24; }
+        .status-info { background: #d1ecf1; color: #0c5460; }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .btn-view { background-color: #17a2b8; color: white; }
+        .btn-edit { background-color: #ffc107; color: #212529; }
+        .btn-delete { background-color: #dc3545; color: white; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="{% url 'admin_dashboard' %}" style="color: white; text-decoration: none;">Administrator</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'admin_users_list' %}">Người dùng</a></li>
+                <li><a href="{% url 'admin_orders_list' %}">Đơn hàng</a></li>
+                <li><a href="{% url 'admin_payments_list' %}">Thanh toán</a></li>
+                <li><a href="{% url 'admin_shippings_list' %}">Vận chuyển</a></li>
+                <li><a href="{% url 'book_list' %}">Xem cửa hàng</a></li>
+                <li><a href="{% url 'logout' %}">Đăng xuất ({{ user.username }})</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container" style="padding-top: 30px; padding-bottom: 50px;">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="margin-bottom: 20px;">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Admin Panel - BookStore Management System.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

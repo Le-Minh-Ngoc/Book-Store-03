@@ -1,0 +1,74 @@
+{% extends 'base/admin_base.html' %}
+{% load humanize %}
+
+{% block title %}Quản lý đơn hàng - Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="color: #1a2980; font-size: 1.8rem;">Danh sách đơn hàng</h1>
+</div>
+
+<div class="admin-card">
+    <form method="GET" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input type="text" name="id" placeholder="Mã đơn hàng/Customer..." value="{{ request.GET.id }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; flex-grow: 1;">
+        <select name="status" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Chờ xử lý</option>
+            <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Đã xác nhận</option>
+            <option value="shipping" {% if request.GET.status == 'shipping' %}selected{% endif %}>Đang giao</option>
+            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Hoàn thành</option>
+            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+        </select>
+        <button type="submit" style="padding: 8px 15px; background: #1a2980; color: white; border: none; border-radius: 4px; cursor: pointer;">Lọc</button>
+    </form>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã ĐH</th>
+                    <th>Ngày đặt</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><b>{{ order.id }}</b></td>
+                    <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {{ order.customer.user.fullname|default:order.customer.user.username }}
+                        <br>
+                        <small style="color: #888;">{{ order.customer.user.email }}</small>
+                    </td>
+                    <td style="font-weight: bold; color: #1a2980;">{{ order.total|floatformat:0|intcomma }} VNĐ</td>
+                    <td>
+                        <form method="POST" action="{% url 'admin_update_order_status' order.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; 
+                                {% if order.status == 'completed' %}background: #d4edda; color: #155724;{% elif order.status == 'cancelled' %}background: #f8d7da; color: #721c24;{% else %}background: #fff3cd; color: #856404;{% endif %}">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Chờ xử lý</option>
+                                <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Đã xác nhận</option>
+                                <option value="shipping" {% if order.status == 'shipping' %}selected{% endif %}>Đang giao</option>
+                                <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Hoàn thành</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Hủy đơn</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_order_detail' order.id %}" class="btn-action btn-view">Chi tiết</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">Không tìm thấy đơn hàng nào.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base/admin_base.html' %}
+{% load humanize %}
+
+{% block title %}Chi tiết vận chuyển - Admin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_shippings_list' %}" class="btn-action btn-view">&larr; Quay lại danh sách</a>
+</div>
+
+<div class="admin-card" style="max-width: 800px; margin: 0 auto;">
+    <h2 style="color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Chi tiết vận chuyển #{{ shipping.id }}</h2>
+    
+    <div style="margin: 20px 0;">
+        <p><strong>Đơn hàng:</strong> <a href="{% url 'admin_order_detail' shipping.order.id %}">#{{ shipping.order.id }}</a></p>
+        <p><strong>Địa chỉ nhận hàng:</strong> 
+            {% if shipping.address %}
+                {{ shipping.address.num }} {{ shipping.address.street }}, {{ shipping.address.city }}, {{ shipping.address.country }}
+            {% else %}
+                Chưa cập nhật
+            {% endif %}
+        </p>
+        <p><strong>Người nhận:</strong> {{ shipping.order.customer.user.fullname }} ({{ shipping.order.customer.tel }})</p>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <form method="POST" action="{% url 'admin_assign_shipper' shipping.id %}" style="margin-bottom: 20px;">
+        {% csrf_token %}
+        <h4 style="margin-bottom: 10px; color: #1a2980;">Phân công Shipper</h4>
+        <div style="display: flex; gap: 10px;">
+            <select name="shipper_id" style="padding: 10px; border-radius: 4px; border: 1px solid #ddd; flex-grow: 1;">
+                <option value="">-- Chọn Shipper --</option>
+                {% for shipper in shippers %}
+                <option value="{{ shipper.id }}" {% if shipping.shipper.id == shipper.id %}selected{% endif %}>
+                    {{ shipper.staff.user.fullname }} ({{ shipper.vehicle_number }})
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-action btn-edit" style="border: none; cursor: pointer;">Phân công</button>
+        </div>
+    </form>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <form method="POST" action="{% url 'admin_update_shipping_status' shipping.id %}">
+        {% csrf_token %}
+        <h4 style="margin-bottom: 10px; color: #1a2980;">Cập nhật trạng thái</h4>
+        <div style="display: flex; gap: 10px;">
+            <select name="status" style="padding: 10px; border-radius: 4px; border: 1px solid #ddd; flex-grow: 1;">
+                <option value="pending" {% if shipping.status == 'pending' %}selected{% endif %}>Chờ xử lý</option>
+                <option value="shipping" {% if shipping.status == 'shipping' %}selected{% endif %}>Đang giao hàng</option>
+                <option value="delivered" {% if shipping.status == 'delivered' %}selected{% endif %}>Giao thành công</option>
+                <option value="failed" {% if shipping.status == 'failed' %}selected{% endif %}>Giao thất bại</option>
+            </select>
+            <button type="submit" class="btn-action btn-view" style="border: none; cursor: pointer;">Cập nhật</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

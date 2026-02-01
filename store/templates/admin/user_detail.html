@@ -1,0 +1,122 @@
+{% extends 'base/admin_base.html' %}
+{% load humanize %}
+
+{% block title %}Chi tiết người dùng - Admin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_users_list' %}" class="btn-action btn-view">&larr; Quay lại danh sách</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+    <!-- User Info -->
+    <div class="admin-card">
+        <h3 style="margin-top: 0; color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Thông tin tài khoản</h3>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="width: 100px; height: 100px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 2rem; color: #6c757d; font-weight: bold;">
+                {{ user.username|first|upper }}
+            </div>
+            <h2 style="margin: 10px 0 5px;">{{ user.fullname }}</h2>
+            <p style="color: #6c757d;">@{{ user.username }}</p>
+        </div>
+
+        <table style="width: 100%;">
+            <tr>
+                <td style="font-weight: 600; width: 40%;">Email:</td>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Điện thoại:</td>
+                <td>{{ user.tel|default:"Chưa cập nhật" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Ngày tham gia:</td>
+                <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Lần đăng nhập cuối:</td>
+                <td>{{ user.last_login|date:"d/m/Y H:i"|default:"Chưa đăng nhập" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Vai trò:</td>
+                <td>
+                    {% if user.is_superuser %}
+                        <span class="status-badge status-danger">Admin</span>
+                    {% elif is_staff %}
+                        <span class="status-badge status-info">Nhân viên</span>
+                    {% else %}
+                        <span class="status-badge status-success">Khách hàng</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Trạng thái:</td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="status-badge status-success">Hoạt động</span>
+                    {% else %}
+                        <span class="status-badge status-danger">Đã khóa</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="{% url 'admin_toggle_user_status' user.id %}" class="btn-action {% if user.is_active %}btn-delete{% else %}btn-view{% endif %}" onclick="return confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản này?')">
+                {% if user.is_active %}Khóa tài khoản{% else %}Mở khóa tài khoản{% endif %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Related Info -->
+    <div>
+        {% if is_customer %}
+        <div class="admin-card">
+            <h3 style="margin-top: 0; color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Lịch sử đơn hàng (Customer)</h3>
+            
+            {% if orders %}
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                            <td style="font-weight: bold; color: #1a2980;">{{ order.total|floatformat:0|intcomma }} VNĐ</td>
+                            <td>
+                                <span class="status-badge status-info">{{ order.status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_order_detail' order.id %}" class="btn-action btn-view">Xem</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Khách hàng này chưa có đơn hàng nào.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if is_staff %}
+        <div class="admin-card">
+            <h3 style="margin-top: 0; color: #1a2980; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Thông tin nhân viên</h3>
+            <p><strong>Bộ phận:</strong> {{ user.staff_profile.manager_profile.department|default:"Chung" }}</p>
+            <p><strong>Roles:</strong> {{ user.staff_profile.manager_profile.role.name|default:"Nhân viên" }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

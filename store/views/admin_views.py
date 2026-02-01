@@ -21,6 +21,28 @@ def check_admin_permission(user):
 
 
 @login_required
+def admin_dashboard(request):
+    if not check_admin_permission(request.user):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    # Thống kê nhanh
+    total_users = UserDAO.get_all_users().count()
+    total_orders = OrderDAO.get_all_orders().count()
+    pending_orders = OrderDAO.get_orders_by_status('pending').count()
+    completed_orders = OrderDAO.get_orders_by_status('completed').count()
+    total_revenue = OrderDAO.get_all_orders().filter(status='completed').aggregate(Sum('total'))['total__sum'] or 0
+    
+    context = {
+        'total_users': total_users,
+        'total_orders': total_orders,
+        'pending_orders': pending_orders,
+        'completed_orders': completed_orders,
+        'total_revenue': total_revenue
+    }
+    return render(request, 'admin/dashboard.html', context)
+
+
+@login_required
 def admin_users_list_view(request):
     if not check_admin_permission(request.user):
         return JsonResponse({'error': 'Unauthorized'}, status=403)

@@ -1,0 +1,75 @@
+{% extends 'base/admin_base.html' %}
+
+{% block title %}Quản lý người dùng - Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="color: #1a2980; font-size: 1.8rem;">Danh sách người dùng</h1>
+    <a href="{% url 'admin_create_staff' %}" class="btn-action btn-view" style="padding: 10px 15px; font-weight: 600;">+ Thêm nhân viên</a>
+</div>
+
+<div class="admin-card">
+    <form method="GET" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input type="text" name="search" placeholder="Tìm kiếm theo tên, username..." value="{{ request.GET.search }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; flex-grow: 1;">
+        <select name="role" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Tất cả vai trò</option>
+            <option value="customer" {% if request.GET.role == 'customer' %}selected{% endif %}>Khách hàng</option>
+            <option value="staff" {% if request.GET.role == 'staff' %}selected{% endif %}>Nhân viên</option>
+            <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Quản trị viên</option>
+        </select>
+        <button type="submit" style="padding: 8px 15px; background: #1a2980; color: white; border: none; border-radius: 4px; cursor: pointer;">Lọc</button>
+    </form>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Họ tên</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td><b>{{ user.username }}</b></td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.fullname }}</td>
+                    <td>
+                        {% if user.is_superuser %}
+                            <span class="status-badge status-danger">Admin</span>
+                        {% elif user.staff_profile %}
+                            <span class="status-badge status-info">Nhân viên</span>
+                        {% else %}
+                            <span class="status-badge status-success">Khách hàng</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="status-badge status-success">Hoạt động</span>
+                        {% else %}
+                            <span class="status-badge status-danger">Đã khóa</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_user_detail' user.id %}" class="btn-action btn-view">Xem</a>
+                        <a href="{% url 'admin_toggle_user_status' user.id %}" class="btn-action {% if user.is_active %}btn-delete{% else %}btn-view{% endif %}" onclick="return confirm('Bạn có chắc muốn thực hiện hành động này?')">
+                            {% if user.is_active %}Khóa{% else %}Mở{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">Không tìm thấy người dùng nào.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
