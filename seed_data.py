@@ -259,9 +259,9 @@ def create_books(categories, publishers, authors):
 def create_suppliers():
     print("Tạo suppliers...")
     suppliers_data = [
-        {'name': 'Công ty Sách Việt', 'address': 'Hà Nội', 'contact_number': '0241234567', 'email': 'contact@sachviet.com'},
-        {'name': 'Công ty Phát hành Sách Trẻ', 'address': 'TP.HCM', 'contact_number': '0281234567', 'email': 'info@sachtre.com'},
-        {'name': 'Nhà cung cấp Sách Toàn quốc', 'address': 'Đà Nẵng', 'contact_number': '0236123456', 'email': 'sales@sachtoanquoc.com'},
+        {'id': 'SUP001', 'name': 'Công ty Sách Việt', 'address': 'Hà Nội', 'tel': '0241234567', 'email': 'contact@sachviet.com'},
+        {'id': 'SUP002', 'name': 'Công ty Phát hành Sách Trẻ', 'address': 'TP.HCM', 'tel': '0281234567', 'email': 'info@sachtre.com'},
+        {'id': 'SUP003', 'name': 'Nhà cung cấp Sách Toàn quốc', 'address': 'Đà Nẵng', 'tel': '0236123456', 'email': 'sales@sachtoanquoc.com'},
     ]
     
     suppliers = []

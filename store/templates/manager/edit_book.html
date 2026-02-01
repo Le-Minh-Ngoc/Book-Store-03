@@ -1,0 +1,89 @@
+{% extends 'base/manager_base.html' %}
+
+{% block title %}Chỉnh sửa sách - BookStore{% endblock %}
+
+{% block content %}
+<div style="margin: 30px 0;">
+    <div style="margin-bottom: 2rem;">
+        <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            Chỉnh sửa sách: {{ book.title }}
+        </h1>
+        <a href="{% url 'manager_books' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white;">
+            &larr; Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Cột trái -->
+                <div>
+                    <div class="form-group">
+                        <label for="title">Tên sách</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isbn">ISBN</label>
+                        <input type="text" class="form-control" id="isbn" name="isbn" value="{{ book.ISBN }}" disabled>
+                        <small style="color: #666;">Không thể thay đổi ISBN</small>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="price">Giá (VNĐ)</label>
+                            <input type="number" class="form-control" id="price" name="price" value="{{ book.price|floatformat:0 }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Số lượng tồn kho</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ book.quantity }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="publisher">Nhà xuất bản</label>
+                        <select class="form-control" id="publisher" name="publisher">
+                            {% for pub in publishers %}
+                            <option value="{{ pub.id }}" {% if book.publisher.id == pub.id %}selected{% endif %}>
+                                {{ pub.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cột phải -->
+                <div>
+                    <div class="form-group">
+                        <label>Hình ảnh hiện tại</label>
+                        <div style="margin-bottom: 1rem;">
+                            {% if book.image_url %}
+                            <img src="{{ book.image_url }}" alt="{{ book.title }}" style="max-height: 200px; border-radius: 8px;">
+                            {% else %}
+                            <p>Chưa có hình ảnh</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image_url">URL Hình ảnh mới</label>
+                        <input type="url" class="form-control" id="image_url" name="image_url" value="{{ book.image_url }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Mô tả</label>
+                        <textarea class="form-control" id="description" name="description" rows="5">{{ book.description }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                <a href="{% url 'manager_books' %}" class="btn btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

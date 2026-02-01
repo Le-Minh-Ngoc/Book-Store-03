@@ -5,6 +5,9 @@ from store.models import Book, Category, DamagedBook
 from store.controllers.BookDAO.book_dao import BookDAO
 from store.controllers.BookDAO.category_dao import CategoryDAO
 from store.controllers.BookDAO.damaged_book_dao import DamagedBookDAO
+from store.controllers.BookDAO.author_dao import AuthorDAO
+from store.controllers.BookDAO.publisher_dao import PublisherDAO
+from django.contrib import messages
 
 
 @login_required
@@ -94,8 +97,18 @@ def manager_damaged_books_view(request):
 def manager_add_book_view(request):
     if not hasattr(request.user, 'staff_profile'):
         return redirect('book_list')
+        
+    if request.method == 'POST':
+        # Xử lý thêm sách (sẽ implement sau hoặc xử lý đơn giản ở đây)
+        # Hiện tại chỉ cần hiển thị form
+        pass
     
-    return render(request, 'manager/add_book.html')
+    context = {
+        'categories': CategoryDAO.get_all_categories(),
+        'authors': AuthorDAO.get_all_authors(),
+        'publishers': PublisherDAO.get_all_publishers(),
+    }
+    return render(request, 'manager/add_book.html', context)
 
 
 @login_required
@@ -106,8 +119,27 @@ def manager_edit_book_view(request, book_id):
     book = BookDAO.get_book_by_id(book_id)
     if not book:
         return redirect('manager_books')
+        
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        quantity = request.POST.get('quantity')
+        # Thêm các trường khác cần update
+        
+        book.title = title
+        book.price = price
+        book.quantity = quantity
+        book.save()
+        
+        messages.success(request, 'Cập nhật sách thành công')
+        return redirect('manager_books')
     
-    context = {'book': book}
+    context = {
+        'book': book,
+        'categories': CategoryDAO.get_all_categories(),
+        'authors': AuthorDAO.get_all_authors(),
+        'publishers': PublisherDAO.get_all_publishers(),
+    }
     return render(request, 'manager/edit_book.html', context)
 
 
