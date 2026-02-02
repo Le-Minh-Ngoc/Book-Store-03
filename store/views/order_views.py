@@ -286,14 +286,16 @@ def track_order_view(request, order_id):
     # Sort timeline by timestamp descending
     timeline.sort(key=lambda x: x['timestamp'], reverse=True)
     
-    # Deduplicate consecutive identical statuses
+    # Deduplicate consecutive identical statuses (only for status type events)
     unique_timeline = []
     if timeline:
         unique_timeline.append(timeline[0])
         for event in timeline[1:]:
             last_event = unique_timeline[-1]
-            # Skip if same type and status
-            if event['type'] != last_event['type'] or event['status'] != last_event['status']:
+            # Always keep tracking events, but deduplicate consecutive identical status events
+            if event['type'] == 'tracking':
+                unique_timeline.append(event)
+            elif event['type'] != last_event['type'] or event['status'] != last_event['status']:
                 unique_timeline.append(event)
                 
     context['timeline'] = unique_timeline

@@ -82,8 +82,7 @@
                             <div>
                                 <strong>Mã vận đơn:</strong>
                                 <span
-                                    style="color: #1a2980; font-weight: bold; font-family: monospace; font-size: 1.1rem;">{{
-                                    shipping.tracking_number }}</span>
+                                    style="color: #1a2980; font-weight: bold; font-family: monospace; font-size: 1.1rem;">{{ shipping.tracking_number }}</span>
                             </div>
                             <div>
                                 <strong>Đơn vị vận chuyển:</strong>
@@ -140,8 +139,7 @@
 
                                         {% if event.location %} - {{ event.location }}{% endif %}
                                     </strong>
-                                    <span style="color: #666; font-size: 0.9rem;">{{ event.timestamp|date:"d/m/Y H:i"
-                                        }}</span>
+                                    <span style="color: #666; font-size: 0.9rem;">{{ event.timestamp|date:"d/m/Y H:i" }}</span>
                                 </div>
                                 {% if event.note %}
                                 <p style="margin: 0; color: #555;">{{ event.note }}</p>
